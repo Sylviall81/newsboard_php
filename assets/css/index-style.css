@@ -1,0 +1,20 @@
+.alert-container {
+    font-size: 0.8rem; /* Reducir el tamaño de la fuente */
+  }
+  
+  .alert.alert-success {
+    padding: 0.5rem; /* Reducir el espacio interno */
+  }
+  
+  .alert.alert-success h4 {
+    margin-bottom: 0; /* Eliminar el margen inferior del encabezado */
+  }
+
+  .alert-container svg {
+    width: 20px; /* Define un ancho para el SVG */
+    height: 20px; /* Define una altura para el SVG */
+  }
+
+
+  /*tabla stilos*/
+ 

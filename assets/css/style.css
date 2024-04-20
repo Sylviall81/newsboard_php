@@ -1,0 +1,17 @@
+
+*{
+    list-style-type: none;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+
+
+
+footer{
+    padding: 4%;
+}
+
+tfoot tr td {
+    height: 1px; /* Ajusta la altura de la línea según sea necesario */
+    background-color: #000; /* Color de la línea, puedes cambiarlo según tu diseño */
+  }
