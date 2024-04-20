@@ -3,7 +3,26 @@
 
 require_once('./lib/db_utils.php');
 
+
+
 $referrer = $_SERVER['HTTP_REFERER'];
+
+	if (!isset($_GET["id"])) {
+
+				$mensaje = "Hay un error en la peticion: faltan parametros requeridos<br><a href=$referrer >VOLVER</a>";
+				echo $mensaje;
+				exit;
+			};
+
+
+$id = ($_GET["id"]);
+
+
+
+
+//query para traer las diferentes categorias y mostrarlas en el datalist ( igual q index)
+$qCategory = "SELECT DISTINCT categoria FROM noticia ORDER BY categoria";
+$resultCategory = consulta($qCategory); 
 
 ?>
 
@@ -14,7 +33,7 @@ $referrer = $_SERVER['HTTP_REFERER'];
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/css/index-style.css">
+  <link rel="stylesheet" href="./assets/css/news-style.css">
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="shortcut icon" href="./assets/img/logoipsum-286.svg" type="image/x-icon">
   <title>News Board PHP</title>
@@ -33,7 +52,7 @@ $referrer = $_SERVER['HTTP_REFERER'];
       <div class="container-fluid">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" href="#">Home</a>
+            <a class="nav-link" href="./index.php">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./login.php">Login</a>
@@ -44,119 +63,124 @@ $referrer = $_SERVER['HTTP_REFERER'];
   </header>
   <main>
 
-    <?php
-    //pedimos todas las noticias
-    $query = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC;";
-    //las contamos
-    $nrows = contar_filas($query);
-    $mensaje = '';
-    ?>
-
     <div class='alert-container'>
       <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
         <symbol id="check-circle-fill" viewBox="0 0 16 16">
           <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
         </symbol>
       </svg>
-
       <div class="alert alert-success d-flex align-items-center" role="alert">
         <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Success:">
           <use xlink:href="#check-circle-fill" />
         </svg>
         <div>
-          <h4><?php echo $mensaje; ?></h4> <!---solo aparece cuando se añade noticia--->
-          <h4> Tienes <?php echo $nrows ?> noticias en tu tablero </h4>
+          <h4><?php echo $mensaje; ?></h4> <!---solo aparece cuando se modifica la noticia--->
+          <h4> Detalle de noticia Id:  <?php echo $_GET['id'] ?> </h4>
         </div>
       </div>
     </div>
-    <section class="news-dashaboard">
-      <div class='table-container'>
+    <section class="news-detail">
 
-        <table class="table table-hover">
-          <thead id="top">
-            <tr>
-              <th><a href="index.php?columna=id">Id de Noticia </a></th>
-              <th colspan="2">Imagen</th>
-              <th><a href="index.php?columna=titulo"> Título </a></th>
-              <th><a href="index.php?columna=autor">Autor/a </a></th>
-              <th colspan="2"><a href="index.php?columna=texto">Contenido</a></th>
-              <th><a href="index.php?columna=categoria">Categoría</a></th>
-              <th><a href="index.php?columna=fecha">Fecha </a></th>
+    <div class="card-container">
 
-            </tr>
-          </thead>
-          <tbody>
-            <?php
 
-            //consulta JOIN de dos tablas que trae la info de la noticia y del usuario que la crea
+		<div class="tarjeta">
 
-            //$q = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC;";
-            $result = consulta($query);
-            while ($row = mysqli_fetch_array($result)) {
-              //print_r ($row); 
-            ?>
+  <?php
 
-              <tr>
-                <td><?php echo $row['id']; ?></td>
-                <td colspan="2"><img src="<?php echo $row['imagen_url'] ?>" alt='imagen noticia' width='120px'></td>
+//peticion query a la db de la info de la noticia concreta con el numero de id del enlace (llega x Get)
+    $q = "SELECT noticia.*, usuarios.nombre 
+    FROM noticia 
+    INNER JOIN usuarios ON noticia.user_id = usuarios.id 
+    WHERE noticia.id = $id";
+		$result = consulta($q);
 
-                <td><strong><?php echo $row["titulo"]; ?></strong></td>
-                <td><?php echo $row["nombre"]; /*nombre del usuario o autor*/ ?></td>
-                <td colspan="2"><?php //echo $row["texto"];Esto es para traerlo todo
-                                $strFinal = substr($row["texto"], 0, 100); //corta la noticia en 100 caract 
-                                echo $strFinal;
-                                if ($strFinal < $row["texto"]) {
-                                  echo " ... ";
-                                }
+		$newsDetail = mysqli_fetch_array($result);
 
-                                //Enlace para noticia completa se envia el id x Get para q nos lleve al clickar
-                                echo "<br><b><a href='news.php?id=" . $row['id'] . "'> Ver Noticia</a></b><br>";
+			$titulo = $newsDetail['titulo'];
+			$texto = $newsDetail['texto'];
+      $autor = $newsDetail['nombre'];
+      $user_id = $newsDetail['user_id'];
+			$categoria = $newsDetail['categoria'];
+			$fecha = $newsDetail['fecha'];
+			$url_image = $newsDetail['url_image'];
 
-                                /*if (isset($_SESSION['user']))*/
 
-                                echo " <br><b><a href='news.php?id=" . $row['id'] . "&update=true'> Ver Noticia y actualizar -></a></b><br>"; ?>
+			?>
 
-                  <form action="delete.php" method="post">
-                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                    <input style="background-color: red;" type="submit" value="Eliminar">
-                  </form>
-                </td>
-                <td><?php echo $row["categoria"]; ?></td>
-                <td><?php echo $row["fecha"]; ?></td>
-                <td colspan="3">
-                  <?php
-                  //enviamos id de noticia traido de la tabla x Get en url para q nos lleve al clickar
-                  echo "<br><b><a href='news.php?id=" . $row['id'] . "'> Ver Noticia</a></b><br>";
 
-                  if (isset($_SESSION['user'])) {
+			<img src="<?php echo $url_image; ?>" alt="Imagen de la noticia">
+			<div class="contenido">
+				<h2><?php echo $titulo; ?></h2>
+				<p>Publicada por: <span class="autor"><?php echo $autor?></span></p>
+        <p>User Id: <span class="autor"><?php echo $user_id?></span></p>
+				<p class="texto"><?php echo $texto; ?></p>
+				<p class="fecha">Fecha de Publicación:<?php echo $fecha; ?> </p>
+				<p class="categoria">Categoría: <?php echo $categoria; ?></p>
+				<a href="index.php" target="_blank">Volver</a>
+			</div>
+		</div>
+	</div>
 
-                    echo " <br><b><a href='news.php?id=" . $row['id'] . "&update=true'> Ver Noticia y actualizar -></a></b><br>"; ?>
 
-                    <form action="delete.php" method="post">
-                      <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                      <input style="background-color: red;" type="submit" value="Eliminar">
-                    </form>
+	<?php
+	if (isset($_GET["update"])) {
+	?>
+		<div class="form-container">
 
-                  <?php } ?>
+			<div class="formulario">
+				<h2>Actualizar Noticia</h2>
+				<form action="update.php" method="POST">
 
-                </td>
-              </tr>
-            <?php } ?>
+					<input type="hidden" id="id" name="id" value="<?php echo $id ?>" required>
 
-          </tbody>
-          <tfoot class="table-dark">
-            <tr>
-              <td colspan='100%'> <a href="#">Páginas</a></td>
-            </tr>
-          </tfoot>
+					<label for="url_imagen">URL de la Imagen:</label>
+					<input type="text" id="imagen-url" name="imagen-url" value="<?php echo $url_image ?>" required>
 
-        </table>
-      </div>
+					<label for="titulo">Título:</label>
+					<input type="text" id="titulo" value="<?php echo $titulo; ?>" name="titulo" required>
+
+					<label for="autor">Autor:</label>
+					<input type="text" value="<?php echo $autor ?>" id="autor" name="autor" required>
+
+					<label for="texto">Contenido:</label>
+					<textarea id="texto" name="texto" rows="4" required>"<?php echo $texto ?>" </textarea>
+
+
+					<label for="fecha">Fecha:</label>
+					<input type="text" id="fecha" value="<?php echo $fecha ?>" name="fecha" required>
+
+					<label for="categoria">Categoría:</label>
+					<input list="categorias" type="text" id="categoria" name="categoria" value="<?php echo $categoria; ?>">
+					<datalist id="categorias">
+						<?php
+
+						// Bucle sobre las distintas categorías.
+						while ($cat = mysqli_fetch_array($resultCategorias)) {
+							$selected = "";
+							if ($categoria == $cat["categoria"]) $selected = "selected";
+						?>
+							<option value="<?php echo $cat["categoria"]; ?>" <?php echo $selected; ?>>
+								<?php echo $cat["categoria"]; ?>
+							</option>
+						<?php  } ?>
+					</datalist>
+
+
+
+					<input type="submit" value="Guardar Cambios">
+				</form>
+			</div>
+
+
+		</div>
+	<?php } ?>
+     
     </section>
 
-    <!--AÑADIR NUEVAS NOTICIAS-->
-    <section id="addNewsForm" class="container-sm">
-      <h5> Añadir Noticia</h5>
+    <!-- Actualizar NOTICIAS-->
+    <section id="updateNewsForm" class="container-sm">
+      <h5> Actualizar Noticia</h5>
 
       <!--aqui empieza el form para añadir nuevas noticias--->
 
@@ -236,19 +260,19 @@ $referrer = $_SERVER['HTTP_REFERER'];
 
 
           if (!consulta($q)) {
+
             $mensaje = "ERROR: no se ha subido la noticia <a href=index.php>'VOLVER'</a>";
             echo $mensaje;
-            header( "location:$referrer");
-            exit;
-            
+
+            exit();
           } else {
+
             $mensaje = 'se ha añadido la noticia exitosamente.Hay ' . $nrows . ' noticias en la base de datos';
+
             echo $mensaje;
-           
+            exit();
           }
         };
-//no se si estto es correcto
-        
 
         ?>
       </form>

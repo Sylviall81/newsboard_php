@@ -1,0 +1,80 @@
+.card-container{
+			
+    padding:30px;
+    width:45%;
+    margin: 0 auto;
+}
+
+.tarjeta {
+display: flex;
+flex-direction: column;
+margin: 20px;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tarjeta img {
+width: 100%;
+height: auto;
+border-top-left-radius: 8px;
+border-top-right-radius: 8px;
+}
+
+.contenido {
+padding: 20px;
+}
+
+.contenido h2 {
+margin-top: 0;
+}
+
+.autor {
+font-weight: bold;
+}
+
+.fecha, .categoria {
+font-style: italic;
+}
+
+.texto {
+margin-top: 10px;
+}
+
+.form-container{
+    padding: 30px;
+    width: 50%;
+
+}
+
+formulario {
+max-width: 400px;
+margin: 20px auto;
+padding: 20px;
+border: 1px solid #ccc;
+border-radius: 8px;
+}
+
+h2 {
+text-align: center;
+}
+
+label {
+display: block;
+margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+width: 100%;
+padding: 8px;
+margin-bottom: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+box-sizing: border-box;
+}
+
+input[type="date"] {
+width: calc(100% - 16px); /* Width minus padding */
+}
