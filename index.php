@@ -140,33 +140,20 @@ require_once('./lib/db_utils.php');
 
     <!--AÑADIR NUEVAS NOTICIAS-->
     <section id="addNewsForm" class="container-sm">
-      <h5> Nueva Noticia</h5>
+      <h5> Añadir Noticia</h5>
 
       <!--aqui empieza el form para añadir nuevas noticias--->
 
       <form class="form-floating mb-3" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
 
         <div class="mb-3">
-          <label for="titulo">
-            Título:</label>
-             <input type="text" name="titulo" class="form-control" id="floatingInput" value="Titular de Noticia Local"><br>
-        </div>
-
-        <div class="mb-3">
-          <label for="texto">Contenido:</label>
-          <textarea name="texto" id="texto" class="form-control" id="floatingTextarea"><?php echo $lorem ?></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label for="imagen_url">
-            Imagen: </label>
-            <input class="form-control" id="floatingInput" type="url" name="imagen_url" value="<?php echo $imagen_url ?>"><br>
-        </div>
-
-        <div class="mb-3">
-
-          <label>Categoría: <input list="categorias" name="categoria" value="" /></label>
-          <datalist id="categorias">
+          <!--titulo-->
+          <label for="titulo">Título:</label>
+          <input type="text" name="titulo" class="form-control" value="Titular de Noticia Local"><br>
+         
+          <!--categoria-->
+          <label>Categoría: <input class="form-control" list="categorias" name="categoria" value="" /></label>
+          <datalist  id="categorias">
             <?php
             //aqui se va a generar una lista tipo select con las categorias que tenemos en las noticias
             $qCategory = "SELECT DISTINCT categoria FROM noticia ORDER BY categoria"; //busqueda categorias existentes en DB
@@ -176,19 +163,32 @@ require_once('./lib/db_utils.php');
             while ($row = mysqli_fetch_array($resultCategory)) { ?>
               <option value="<?php echo $row['categoria']; ?>"><?php echo $row['categoria'] ?></option>
             <?php } ?>
-
           </datalist>
+
+          <!--url de imagen-->
+          <div class="mb-3">
+          <label for="imagen_url">
+            Imagen: </label>
+          <input class="form-control"  type="url" name="imagen_url" value="<?php echo $url_imagen ?>"><br>
+          </div>
+          <!--Contenido-->
+          <div class="mb-3">
+          <label for="texto">Contenido:</label>
+          <textarea name="texto" id="texto" class="form-control" ><?php echo $lorem ?></textarea>
+          </div>
         </div>
 
-        <!--datos del usuario autenticado que se reemplazan con las variables de sesión-->
-        <div class="mb-3 row">
-        <label for="user_name" class="col-sm-2 col-form-label">Creado por:</label>
-        <input class="form-control" type="text" name='user_name' value="Fernando" aria-label="Disabled input example" disabled readonly>
+       
+
+        <!--datos del usuario autenticado creador de noticia que se reemplazan con las variables de sesión-->
+        <div class="mb-3">
+          <label for="user_name" class="col-form-label">Creado por:</label>
+          <input class="form-control" type="text" name='user_name' value="Fernando" readonly>
+          
+          <label for="user_id" class="col-form-label">Id de usuario:</label>
+          <input class="form-control" type="text" value="4" name="user_id" readonly>
         </div>
-        <div class="mb-3 row">
-        <label for="user_id" class="col-sm-2 col-form-label">Id de usuario:</label>
-        <input class="form-control" type="text" value="4" name="user_id" aria-label="Disabled input example" disabled readonly>
-        </div>
+
 
         <!--<input type="hidden" name="user_id" value="4" -->
 
@@ -201,6 +201,8 @@ require_once('./lib/db_utils.php');
 
         <?php
 
+        $mensaje = "";
+
         if ($_SERVER["REQUEST_METHOD"] == "POST" /*&& !(isset($_POST["email"]) && isset($_POST["password"]))*/) {
 
           $titulo = $_POST['titulo'];
@@ -209,24 +211,35 @@ require_once('./lib/db_utils.php');
           $categoria = $_POST['categoria'];
           $imagen_url = $_POST['imagen_url'];
 
+          //echo $titulo." ".$texto." ".$categoria." ".$imagen_url." ".$user_id;
+
 
           $q = " INSERT INTO `noticia` (`id`, `user_id`,`fecha`, `titulo`,`texto`, `categoria`, `imagen_url`) VALUES (NULL,'$user_id',CURRENT_TIMESTAMP,'$titulo','$texto','$categoria','$imagen_url')";
 
           if (consulta($q)) {
-
             //refresca la consulta y actualiza ¿?
-            $refresh_query = consulta($query); // Fetch the updated result set
-            $nrows = contar_filas($refresh_query);
-
-            echo 'se ha añadido la noticia exitosamente.Hay ' . $nrows . 'en la base de datos';
+            //$new_query = consulta($query); // Fetch the updated result set
+            //$nrows = contar_filas($refresh_query);
+            $mensaje = 'se ha añadido la noticia exitosamente.Hay ' . $nrows . ' noticias en la base de datos';
           } else {
-            echo 'error al añadir el registro';
+            $mensaje = 'Error. No se ha podido error al añadir el registro';
           };
+
+          //echo $mensaje;
+          //$refresh_q = 
+          //$update_news = consulta($query); // Fetch the updated result set
+          //$update_nrows = contar_filas($update_news);
+
         };
+
+        echo $mensaje;
+        //$refresh_q = 
+        //$update_news = consulta($query); // Fetch the updated result set
+        //$update_nrows = contar_filas($update_news);
+        
         ?>
-
       </form>
-
+      
     </section>
   </main>
 
