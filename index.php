@@ -123,7 +123,7 @@ require('./lib/fecha.php');
               <th><a href="index.php?columna=autor">Autor/a </a></th>
               <th colspan="2"><a href="index.php?columna=texto">Contenido</a></th>
               <th><a href="index.php?columna=categoria">Categoría</a></th>
-              <th><a href="index.php?columna=fecha">Fecha </a></th>
+              <th><a href="index.php?columna=fecha">Fecha Creación:</a></th>
 
             </tr>
           </thead>
@@ -145,7 +145,7 @@ require('./lib/fecha.php');
                 <td><strong><?php echo $row["titulo"]; ?></strong></td>
                 <td><?php echo $row["nombre"]; /*nombre del usuario o autor*/ ?></td>
                 <td colspan="2"><?php //echo $row["texto"];Esto es para traerlo todo
-                                $strFinal = substr($row["texto"], 0, 120); //corta la noticia en 100 caract 
+                                $strFinal = substr($row["texto"], 0, 80); //corta la noticia en 100 caract 
                                 echo $strFinal;
                                 if ($strFinal < $row["texto"]) {
                                   echo " ... ";
