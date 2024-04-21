@@ -3,7 +3,7 @@
 
 require_once('./lib/db_utils.php');
 
-$referrer = $_SERVER['HTTP_REFERER'];
+//$referrer = $_SERVER['HTTP_REFERER'];
 
 ?>
 
@@ -45,10 +45,19 @@ $referrer = $_SERVER['HTTP_REFERER'];
   <main>
 
     <?php
-    //pedimos todas las noticias
-    $query = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC;";
+
+    
+    //pedimos todas las noticias para contar el total
+    $query = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC";
     //las contamos
+
     $nrows = contar_filas($query);
+
+    //establcemos variables para la paginacion
+    $comienzo = 0;
+    $num = 5;
+
+    $q_visible_rows = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC LIMIT $comienzo,$num";
     $mensaje = '';
     ?>
 
@@ -72,8 +81,30 @@ $referrer = $_SERVER['HTTP_REFERER'];
     <section class="news-dashaboard">
       <div class='table-container'>
 
-        <table class="table table-hover">
-          <thead id="top">
+
+        <table class="table table-borderless table-hover">
+          <thead class="table-light" id="top">
+            <?php
+            /* LOGICA para enviar x get el param x el cual queremos ordenar los resultados de la tabla
+            x defecto es el id x eso $columna es id luego se reasigna valor segun 
+            el caso para modificar el sql query, se añade el LIMIT para mostrar solo un X num de resultados*/
+            $columna = 'id';
+
+            //Var comienzo y num para gestionar la paginacion  y num de noticias mostradas x pag
+            $comienzo = 0;
+            $num = 4;
+
+            if (isset($_GET['columna'])) {
+              $columna = $_GET['columna'];
+
+              $qColumna = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` 
+              ON noticia.user_id = usuarios.id 
+              ORDER BY $columna LIMIT $comienzo,$num";
+              $result = consulta($qColumna);
+            }
+            ?>
+
+
             <tr>
               <th><a href="index.php?columna=id">Id de Noticia </a></th>
               <th colspan="2">Imagen</th>
@@ -91,7 +122,7 @@ $referrer = $_SERVER['HTTP_REFERER'];
             //consulta JOIN de dos tablas que trae la info de la noticia y del usuario que la crea
 
             //$q = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC;";
-            $result = consulta($query);
+            $result = consulta($q_visible_rows);
             while ($row = mysqli_fetch_array($result)) {
               //print_r ($row); 
             ?>
@@ -103,50 +134,56 @@ $referrer = $_SERVER['HTTP_REFERER'];
                 <td><strong><?php echo $row["titulo"]; ?></strong></td>
                 <td><?php echo $row["nombre"]; /*nombre del usuario o autor*/ ?></td>
                 <td colspan="2"><?php //echo $row["texto"];Esto es para traerlo todo
-                                $strFinal = substr($row["texto"], 0, 100); //corta la noticia en 100 caract 
+                                $strFinal = substr($row["texto"], 0, 120); //corta la noticia en 100 caract 
                                 echo $strFinal;
                                 if ($strFinal < $row["texto"]) {
                                   echo " ... ";
                                 }
 
                                 //Enlace para noticia completa se envia el id x Get para q nos lleve al clickar
-                                echo "<br><b><a href='news.php?id=" . $row['id'] . "'> Ver Noticia</a></b><br>";
+                                echo "<br><b><a href='news.php?id=" . $row['id'] . "'> Ver Noticia</a></b><br>"; ?>
 
-                                /*if (isset($_SESSION['user']))*/
-
-                                echo " <br><b><a href='news.php?id=" . $row['id'] . "&update=true'> Ver Noticia y actualizar -></a></b><br>"; ?>
-
-                  <form action="delete.php" method="post">
-                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                    <input style="background-color: red;" type="submit" value="Eliminar">
-                  </form>
+                  <div class="d-flex flex-row justify-content-evenly mb-4">
+                    <div class="me-auto p-2"></div> <!---div sin nada espacio entre botones--->
+                    <?php
+                    echo "<br><a  class ='btn btn-outline-info p-2' href='news.php?id=" . $row['id'] . "&update=true'>Editar</a></b><br>"; ?>
+                    <div class=" p-2"></div><!---div sin nada espacio entre botones--->
+                    <form action="delete.php" method="post">
+                      <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                      <input class="btn btn-outline-danger p-2" type="submit" value="Eliminar">
+                    </form>
+                  </div>
                 </td>
                 <td><?php echo $row["categoria"]; ?></td>
                 <td><?php echo $row["fecha"]; ?></td>
-                <td colspan="3">
-                  <?php
-                  //enviamos id de noticia traido de la tabla x Get en url para q nos lleve al clickar
-                  echo "<br><b><a href='news.php?id=" . $row['id'] . "'> Ver Noticia</a></b><br>";
-
-                  if (isset($_SESSION['user'])) {
-
-                    echo " <br><b><a href='news.php?id=" . $row['id'] . "&update=true'> Ver Noticia y actualizar -></a></b><br>"; ?>
-
-                    <form action="delete.php" method="post">
-                      <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                      <input style="background-color: red;" type="submit" value="Eliminar">
-                    </form>
-
-                  <?php } ?>
-
-                </td>
               </tr>
-            <?php } ?>
+            <?php } ?><!--Fin del bucle-->
 
           </tbody>
           <tfoot class="table-dark">
             <tr>
-              <td colspan='100%'> <a href="#">Páginas</a></td>
+              <td colspan='100%'>
+
+                <!----Logica paginación y Limit-->
+                <?php
+                if ($comienzo > 0) {
+                ?>
+                  <a href="index.php?comienzo=<?php echo $comienzo - $num; ?>" class="button small fa-circle-up"> 🔙 Retroceder </a>
+                <?php
+                }
+                ?>
+                <?php if ($comienzo + $num <= $nrows) { ?>
+                  <a href="index.php?comienzo=<?php echo $comienzo + $num; ?>" class="button small fa-circle-up">Avanzar 🔜 </a>
+                <?php } ?>
+
+
+              </td>
+
+
+
+
+
+              <a href="#">Páginas</a></td>
             </tr>
           </tfoot>
 
@@ -238,17 +275,13 @@ $referrer = $_SERVER['HTTP_REFERER'];
           if (!consulta($q)) {
             $mensaje = "ERROR: no se ha subido la noticia <a href=index.php>'VOLVER'</a>";
             echo $mensaje;
-            header( "location:$referrer");
+            header("location:$referrer");
             exit;
-            
           } else {
             $mensaje = 'se ha añadido la noticia exitosamente.Hay ' . $nrows . ' noticias en la base de datos';
             echo $mensaje;
-           
           }
         };
-//no se si estto es correcto
-        
 
         ?>
       </form>

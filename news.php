@@ -7,12 +7,12 @@ require_once('./lib/db_utils.php');
 
 $referrer = $_SERVER['HTTP_REFERER'];
 
-	if (!isset($_GET["id"])) {
+if (!isset($_GET["id"])) {
 
-				$mensaje = "Hay un error en la peticion: faltan parametros requeridos<br><a href=$referrer >VOLVER</a>";
-				echo $mensaje;
-				exit;
-			};
+  $mensaje = "Hay un error en la peticion: faltan parametros requeridos<br><a href=$referrer >VOLVER</a>";
+  echo $mensaje;
+  exit;
+};
 
 
 $id = ($_GET["id"]);
@@ -22,7 +22,7 @@ $id = ($_GET["id"]);
 
 //query para traer las diferentes categorias y mostrarlas en el datalist ( igual q index)
 $qCategory = "SELECT DISTINCT categoria FROM noticia ORDER BY categoria";
-$resultCategory = consulta($qCategory); 
+$resultCategory = consulta($qCategory);
 
 ?>
 
@@ -74,210 +74,143 @@ $resultCategory = consulta($qCategory);
           <use xlink:href="#check-circle-fill" />
         </svg>
         <div>
-          <h4><?php echo $mensaje; ?></h4> <!---solo aparece cuando se modifica la noticia--->
-          <h4> Detalle de noticia Id:  <?php echo $_GET['id'] ?> </h4>
+          <h4> Estas viendo el detalle de noticia con Id: <?php echo $_GET['id'] ?> </h4>
         </div>
       </div>
     </div>
     <section class="news-detail">
 
-    <div class="card-container">
+      <?php
+      //peticion query a la db de la info de la noticia concreta con el numero de id del enlace (llega x Get)
+      $q = "SELECT noticia.*, usuarios.nombre 
+      FROM noticia 
+      INNER JOIN usuarios ON noticia.user_id = usuarios.id 
+      WHERE noticia.id = $id";
 
+      $result = consulta($q);
+      $newsDetail = mysqli_fetch_array($result);
 
-		<div class="tarjeta">
-
-  <?php
-
-//peticion query a la db de la info de la noticia concreta con el numero de id del enlace (llega x Get)
-    $q = "SELECT noticia.*, usuarios.nombre 
-    FROM noticia 
-    INNER JOIN usuarios ON noticia.user_id = usuarios.id 
-    WHERE noticia.id = $id";
-		$result = consulta($q);
-
-		$newsDetail = mysqli_fetch_array($result);
-
-			$titulo = $newsDetail['titulo'];
-			$texto = $newsDetail['texto'];
+      $titulo = $newsDetail['titulo'];
+      $texto = $newsDetail['texto'];
       $autor = $newsDetail['nombre'];
       $user_id = $newsDetail['user_id'];
-			$categoria = $newsDetail['categoria'];
-			$fecha = $newsDetail['fecha'];
-			$url_image = $newsDetail['url_image'];
+      $categoria = $newsDetail['categoria'];
+      $fecha = $newsDetail['fecha'];
+      $imagen_url = $newsDetail['imagen_url'];
+
+      ?>
 
 
-			?>
+      <div class="card-container">
 
 
-			<img src="<?php echo $url_image; ?>" alt="Imagen de la noticia">
-			<div class="contenido">
-				<h2><?php echo $titulo; ?></h2>
-				<p>Publicada por: <span class="autor"><?php echo $autor?></span></p>
-        <p>User Id: <span class="autor"><?php echo $user_id?></span></p>
-				<p class="texto"><?php echo $texto; ?></p>
-				<p class="fecha">Fecha de Publicación:<?php echo $fecha; ?> </p>
-				<p class="categoria">Categoría: <?php echo $categoria; ?></p>
-				<a href="index.php" target="_blank">Volver</a>
-			</div>
-		</div>
-	</div>
-
-
-	<?php
-	if (isset($_GET["update"])) {
-	?>
-		<div class="form-container">
-
-			<div class="formulario">
-				<h2>Actualizar Noticia</h2>
-				<form action="update.php" method="POST">
-
-					<input type="hidden" id="id" name="id" value="<?php echo $id ?>" required>
-
-					<label for="url_imagen">URL de la Imagen:</label>
-					<input type="text" id="imagen-url" name="imagen-url" value="<?php echo $url_image ?>" required>
-
-					<label for="titulo">Título:</label>
-					<input type="text" id="titulo" value="<?php echo $titulo; ?>" name="titulo" required>
-
-					<label for="autor">Autor:</label>
-					<input type="text" value="<?php echo $autor ?>" id="autor" name="autor" required>
-
-					<label for="texto">Contenido:</label>
-					<textarea id="texto" name="texto" rows="4" required>"<?php echo $texto ?>" </textarea>
-
-
-					<label for="fecha">Fecha:</label>
-					<input type="text" id="fecha" value="<?php echo $fecha ?>" name="fecha" required>
-
-					<label for="categoria">Categoría:</label>
-					<input list="categorias" type="text" id="categoria" name="categoria" value="<?php echo $categoria; ?>">
-					<datalist id="categorias">
-						<?php
-
-						// Bucle sobre las distintas categorías.
-						while ($cat = mysqli_fetch_array($resultCategorias)) {
-							$selected = "";
-							if ($categoria == $cat["categoria"]) $selected = "selected";
-						?>
-							<option value="<?php echo $cat["categoria"]; ?>" <?php echo $selected; ?>>
-								<?php echo $cat["categoria"]; ?>
-							</option>
-						<?php  } ?>
-					</datalist>
+        <div class="card" style="width: 35rem;">
 
 
 
-					<input type="submit" value="Guardar Cambios">
-				</form>
-			</div>
 
+          <img class="card-img-top" src="<?php echo $imagen_url; ?>" alt="Imagen de la noticia">
+          <div class="card-body">
+            <h4 class="card-title"><?php echo $titulo; ?></h4>
 
-		</div>
-	<?php } ?>
-     
-    </section>
-
-    <!-- Actualizar NOTICIAS-->
-    <section id="updateNewsForm" class="container-sm">
-      <h5> Actualizar Noticia</h5>
-
-      <!--aqui empieza el form para añadir nuevas noticias--->
-
-      <form class="form-floating mb-3" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-
-        <div class="mb-3">
-          <!--titulo-->
-          <label for="titulo">Título:</label>
-          <input type="text" name="titulo" class="form-control" value="Titular de Noticia Local"><br>
-
-          <!--categoria-->
-          <label>Categoría: <input class="form-control" list="categorias" name="categoria" value="" /></label>
-          <datalist id="categorias">
-            <?php
-            //aqui se va a generar una lista tipo select con las categorias que tenemos en las noticias
-            $qCategory = "SELECT DISTINCT categoria FROM noticia ORDER BY categoria"; //busqueda categorias existentes en DB
-            $resultCategory = consulta($qCategory); //consulta
-
-            //bucle que recorre cada fila para pintar las categorias que existen
-            while ($row = mysqli_fetch_array($resultCategory)) { ?>
-              <option value="<?php echo $row['categoria']; ?>"><?php echo $row['categoria'] ?></option>
-            <?php } ?>
-          </datalist>
-
-          <!--url de imagen-->
-          <div class="mb-3">
-            <label for="imagen_url">
-              Imagen: </label>
-            <input class="form-control" type="url" name="imagen_url" value="<?php echo $url_imagen ?>"><br>
+            <p class="card-text"><?php echo $texto; ?></p>
           </div>
-          <!--Contenido-->
-          <div class="mb-3">
-            <label for="texto">Contenido:</label>
-            <textarea name="texto" id="texto" class="form-control"><?php echo $lorem ?></textarea>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Categoría:<?php echo $categoria; ?> </li>
+            <li class="list-group-item">Publicada por: <span class="autor"><?php echo $autor ?></span></li>
+            <li class="list-group-item">User Id: <span class="autor"><?php echo $user_id ?></span></li>
+            <li class="list-group-item">Fecha publicación:<?php echo $fecha; ?> </li>
+
+          </ul>
+          <div class='card-footer'>
+            <a class='btn btn-primary' href="index.php" target="_blank"> Home</a>
           </div>
         </div>
-
-
-
-        <!--datos del usuario autenticado creador de noticia que se reemplazan con las variables de sesión-->
-        <div class="mb-3">
-          <label for="user_name" class="col-form-label">Creado por:</label>
-          <input class="form-control" type="text" name='user_name' value="Fernando" readonly>
-
-          <label for="user_id" class="col-form-label">Id de usuario:</label>
-          <input class="form-control" type="text" value="4" name="user_id" readonly>
-        </div>
-
-
-        <!--<input type="hidden" name="user_id" value="4" -->
-
-        <!-- <label> //x si decido incluir imagen de archivo 
-            Subir Imagen:<br>
-            <input type="file" name="imagen-file" id="imagen-file">
-          </label> -->
-
-        <input type="submit" value="Enviar" name="submit">
-
-        <?php
-
-        $mensaje = "";
-
-        if ($_SERVER["REQUEST_METHOD"] == "POST" /*&& !(isset($_POST["email"]) && isset($_POST["password"]))*/) {
-
-          $titulo = $_POST['titulo'];
-          $user_id = $_POST['user_id'];
-          $texto = $_POST['texto'];
-          $categoria = $_POST['categoria'];
-          $imagen_url = $_POST['imagen_url'];
-
-          //echo $titulo." ".$texto." ".$categoria." ".$imagen_url." ".$user_id;
-
-
-          $q = " INSERT INTO `noticia` (`id`, `user_id`,`fecha`, `titulo`,`texto`, `categoria`, `imagen_url`) VALUES (NULL,'$user_id',CURRENT_TIMESTAMP,'$titulo','$texto','$categoria','$imagen_url')";
-
-
-
-
-          if (!consulta($q)) {
-
-            $mensaje = "ERROR: no se ha subido la noticia <a href=index.php>'VOLVER'</a>";
-            echo $mensaje;
-
-            exit();
-          } else {
-
-            $mensaje = 'se ha añadido la noticia exitosamente.Hay ' . $nrows . ' noticias en la base de datos';
-
-            echo $mensaje;
-            exit();
-          }
-        };
-
-        ?>
-      </form>
-
+      </div>
     </section>
+
+
+    <?php /*Solo cuando update llega x get se muestra el update form*/
+    if (isset($_GET["update"])) { ?>
+
+      <section id="updateNewsForm" class="container-sm">
+
+
+        <h5> Actualizar Noticia</h5>
+
+        <!--aqui empieza el form para añadir nuevas noticias--->
+
+        <form class="form-floating mb-3" ction="update.php" method="POST">
+
+          <div class="mb-3">
+            <!--titulo-->
+            <label for="titulo">Título:</label>
+            <input type="text" name="titulo" class="form-control" value="<?php echo $newsDetail['titulo'] ?>"><br>
+
+            <!--categoria-->
+            <label>Categoría: <input class="form-control" list="categorias" name="categoria" value="<?php echo $newsDetail['categoria'] ?>" /></label>
+            <datalist id="categorias">
+              <?php
+              //aqui se va a generar una lista tipo select con las categorias que tenemos en las noticias
+              $qCategory = "SELECT DISTINCT categoria FROM noticia ORDER BY categoria"; //busqueda categorias existentes en DB
+              $resultCategory = consulta($qCategory); //consulta
+
+              //bucle que recorre cada fila para pintar las categorias que existen
+              while ($row = mysqli_fetch_array($resultCategory)) {
+
+                $selected = "";
+                if ($categoria == $row["categoria"]) $selected = "selected"
+              ?>
+                <option value="<?php echo $row["categoria"]; ?>" <?php echo $selected; ?>>
+                  <?php echo $row["categoria"]; ?>
+                </option>
+              <?php  } ?>
+            </datalist>
+
+            <!--url de imagen-->
+            <div class="mb-3">
+              <label for="imagen_url">
+                Imagen: </label>
+              <input class="form-control" type="url" name="imagen_url" value="<?php echo $url_imagen ?>"><br>
+            </div>
+            <!--Contenido-->
+            <div class="mb-3">
+              <label for="texto">Contenido:</label>
+              <textarea name="texto" id="texto" class="form-control"><?php echo $lorem ?></textarea>
+            </div>
+          </div>
+
+
+
+          <!--datos del usuario autenticado creador de noticia que se reemplazan con las variables de sesión-->
+          <div class="mb-3">
+            <label for="user_name" class="col-form-label">Creado por:</label>
+            <input class="form-control" type="text" name='user_name' value="Fernando" readonly>
+
+            <label for="user_id" class="col-form-label">Id de usuario:</label>
+            <input class="form-control" type="text" value="4" name="user_id" readonly>
+          </div>
+
+
+          <!--<input type="hidden" name="user_id" value="4" -->
+
+          <!-- <label> //x si decido incluir imagen de archivo 
+      Subir Imagen:<br>
+      <input type="file" name="imagen-file" id="imagen-file">
+    </label> -->
+
+          <input type="submit" value="Actualizar" name="submit">
+
+
+        </form>
+
+      </section>
+
+    <?php } ?>
+
+
+
+
   </main>
 
   <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
@@ -300,13 +233,6 @@ $resultCategory = consulta($qCategory);
           </svg></a></li>
     </ul>
   </footer>
-
-
-
-
-
-
-
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
