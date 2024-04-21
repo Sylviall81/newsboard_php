@@ -48,7 +48,16 @@ require('./lib/fecha.php');
 
     <?php
 
-    
+    $currentDate = today(); //formato año/mes/dia
+
+    $currentDay = dayofdate($currentDate);
+    $currentMonth = monthofdate($currentDate);
+    $currentYear = yearofdate($currentDate);
+
+    //$formattedDate = dmy2date($currentDay,$currentMonth,$currentYear);
+
+
+
     //pedimos todas las noticias para contar el total
     $query = "SELECT noticia.*, usuarios.nombre, usuarios.email FROM `noticia` INNER JOIN `usuarios` ON noticia.user_id = usuarios.id ORDER BY noticia.fecha DESC";
     //las contamos
@@ -76,7 +85,7 @@ require('./lib/fecha.php');
         </svg>
         <div>
           <h4><?php echo $mensaje; ?></h4> <!---solo aparece cuando se añade noticia--->
-          <h4> Tienes <?php echo $nrows ?> noticias en tu tablero </h4>
+          <h4> El día de hoy: <?php echo $currentDay?> / <?php echo $currentMonth?> / <?php echo $currentYear?> tienes <?php echo $nrows ?> noticias en tu tablero </h4>
         </div>
       </div>
     </div>
