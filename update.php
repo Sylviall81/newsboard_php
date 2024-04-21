@@ -6,7 +6,6 @@ require('ini.php');
 require('db_utils.php');
 
 
-
 $referrer = $_SERVER['HTTP_REFERER'];
 
 if (!isset($_POST['id']) || ($_POST['id']) == "" ){
