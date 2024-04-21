@@ -2,6 +2,8 @@
 
 
 require_once('./lib/db_utils.php');
+require('./lib/fecha.php');
+//require ('./lib/ini.php');
 
 //$referrer = $_SERVER['HTTP_REFERER'];
 
@@ -155,7 +157,7 @@ require_once('./lib/db_utils.php');
                   </div>
                 </td>
                 <td><?php echo $row["categoria"]; ?></td>
-                <td><?php echo $row["fecha"]; ?></td>
+                <td><?php echo date2string($row["fecha"]); ?></td>
               </tr>
             <?php } ?><!--Fin del bucle-->
 
