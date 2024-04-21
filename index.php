@@ -168,12 +168,12 @@ require_once('./lib/db_utils.php');
                 <?php
                 if ($comienzo > 0) {
                 ?>
-                  <a href="index.php?comienzo=<?php echo $comienzo - $num; ?>" class="button small fa-circle-up"> 🔙 Retroceder </a>
+                  <a class ='btn btn-light' href="index.php?comienzo=<?php echo $comienzo - $num; ?>" class="button small fa-circle-up"> 🔙 Retroceder </a>
                 <?php
                 }
                 ?>
                 <?php if ($comienzo + $num <= $nrows) { ?>
-                  <a href="index.php?comienzo=<?php echo $comienzo + $num; ?>" class="button small fa-circle-up">Avanzar 🔜 </a>
+                  <a  class='btn btn-light' href="index.php?comienzo=<?php echo $comienzo + $num; ?>" class="button small fa-circle-up">Avanzar 🔜 </a>
                 <?php } ?>
 
 
